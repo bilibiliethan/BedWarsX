@@ -1,0 +1,12 @@
+name: BedWarsX
+version: 0.1.0
+main: com.example.bedwars.BedWarsPlugin
+api-version: '1.20'
+commands:
+  bw:
+    description: BedWars command
+    usage: /bw <join|setlobby|leave|start|shop|map ...>
+permissions:
+  bedwars.admin:
+    description: Allows map editing and game start
+    default: op
