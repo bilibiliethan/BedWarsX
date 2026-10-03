@@ -6,20 +6,24 @@ import java.util.List;
 import java.util.UUID;
 
 public class Game {
-    private final BedWarsPlugin plugin;
+    private final UUID id;
     private final GameMode mode;
     private final MapData mapData;
+    private GameState state = GameState.WAITING;
     private final List<Player> players = new ArrayList<>();
     private final List<Team> teams = new ArrayList<>();
-    private final UUID id = UUID.randomUUID();
-    private boolean started = false;
 
-    public Game(BedWarsPlugin plugin, GameMode mode, MapData mapData) {
-        this.plugin = plugin;
+    // 适配 BedWarsPlugin 里的调用：new Game(UUID.randomUUID(), mode)
+    public Game(UUID id, GameMode mode) {
+        this(id, mode, null);
+    }
+
+    // 适配 BedWarsPlugin 里的调用：new Game(UUID.randomUUID(), mode, mapData)
+    public Game(UUID id, GameMode mode, MapData mapData) {
+        this.id = id;
         this.mode = mode;
         this.mapData = mapData;
-        // 初始化队伍（根据地图数据，默认4个队伍）
-        int teamCount = mapData.getTeamSpawns() != null ? mapData.getTeamSpawns().size() : 4;
+        int teamCount = (mapData != null && mapData.getTeamSpawns() != null) ? mapData.getTeamSpawns().size() : 4;
         for (int i = 0; i < teamCount; i++) {
             teams.add(new Team(i, this));
         }
@@ -28,44 +32,13 @@ public class Game {
     public UUID getId() { return id; }
     public GameMode getMode() { return mode; }
     public MapData getMapData() { return mapData; }
+    public GameState getState() { return state; }
+    public void setState(GameState state) { this.state = state; }
     public List<Player> getPlayers() { return players; }
     public List<Team> getTeams() { return teams; }
-    public boolean isStarted() { return started; }
-    public void setStarted(boolean started) { this.started = started; }
 
-    // 补全的方法 1：根据玩家获取所在队伍
-    public Team getTeam(Player player) {
-        for (Team team : teams) {
-            if (team.contains(player)) {
-                return team;
-            }
-        }
-        return null;
-    }
-
-    // 补全的方法 2：向游戏内所有玩家广播消息
-    public void broadcast(String message) {
-        for (Player player : players) {
-            player.sendMessage(message);
-        }
-    }
-
-    // 补全的方法 3：检查游戏是否结束（例如只剩一队）
-    public void checkWinner() {
-        List<Team> aliveTeams = new ArrayList<>();
-        for (Team team : teams) {
-            if (!team.getPlayers().isEmpty()) {
-                aliveTeams.add(team);
-            }
-        }
-        if (aliveTeams.size() == 1) {
-            broadcast("§e游戏结束！获胜队伍: " + aliveTeams.get(0).getId());
-            // 在这里可以添加结束游戏、重置状态的逻辑
-            this.started = false;
-        }
-    }
-
-    public void addPlayer(Player player) {
+    // 修改为返回 boolean，适配 BedWarsPlugin 里的 boolean added = game.addPlayer(player);
+    public boolean addPlayer(Player player) {
         if (!players.contains(player)) {
             players.add(player);
             for (Team team : teams) {
@@ -74,7 +47,9 @@ public class Game {
                     break;
                 }
             }
+            return true;
         }
+        return false;
     }
 
     public void removePlayer(Player player) {
@@ -84,7 +59,25 @@ public class Game {
         }
     }
 
-    public boolean containsPlayer(Player player) {
-        return players.contains(player);
+    public Team getTeam(Player player) {
+        for (Team team : teams) {
+            if (team.contains(player)) return team;
+        }
+        return null;
+    }
+
+    public void broadcast(String message) {
+        for (Player player : players) player.sendMessage(message);
+    }
+
+    public void checkWinner() {
+        List<Team> alive = new ArrayList<>();
+        for (Team team : teams) {
+            if (!team.getPlayers().isEmpty()) alive.add(team);
+        }
+        if (alive.size() == 1) {
+            broadcast("§e游戏结束！获胜队伍: " + alive.get(0).getId());
+            state = GameState.ENDED;
+        }
     }
 }
