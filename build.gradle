@@ -18,26 +18,11 @@ repositories {
         name = 'papermc'
         url = 'https://repo.papermc.io/repository/maven-public/'
     }
-    // 添加 Kyori 仓库，用于下载 Adventure 依赖
-    maven {
-        name = 'kyori'
-        url = 'https://repo.kyori.net/repository/maven-public/'
-    }
-    maven {
-        name = 'kyori-snapshots'
-        url = 'https://repo.kyori.net/repository/maven-snapshots/'
-    }
-}
-
-// 强制使用稳定版的 Adventure BOM，避免快照丢失导致下载失败
-configurations.all {
-    resolutionStrategy {
-        force 'net.kyori:adventure-bom:4.17.0'
-    }
 }
 
 dependencies {
-    compileOnly 'io.papermc.paper:paper-api:1.20.5-R0.1-SNAPSHOT'
+    // 使用 1.20.6 的 API，兼容 1.20.5 服务端，且修复了 POM 缺失问题
+    compileOnly 'io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT'
 }
 
 tasks.withType(JavaCompile).configureEach {
