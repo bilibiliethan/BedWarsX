@@ -33,12 +33,43 @@ public class Game {
     public boolean isStarted() { return started; }
     public void setStarted(boolean started) { this.started = started; }
 
+    // 补全的方法 1：根据玩家获取所在队伍
+    public Team getTeam(Player player) {
+        for (Team team : teams) {
+            if (team.contains(player)) {
+                return team;
+            }
+        }
+        return null;
+    }
+
+    // 补全的方法 2：向游戏内所有玩家广播消息
+    public void broadcast(String message) {
+        for (Player player : players) {
+            player.sendMessage(message);
+        }
+    }
+
+    // 补全的方法 3：检查游戏是否结束（例如只剩一队）
+    public void checkWinner() {
+        List<Team> aliveTeams = new ArrayList<>();
+        for (Team team : teams) {
+            if (!team.getPlayers().isEmpty()) {
+                aliveTeams.add(team);
+            }
+        }
+        if (aliveTeams.size() == 1) {
+            broadcast("§e游戏结束！获胜队伍: " + aliveTeams.get(0).getId());
+            // 在这里可以添加结束游戏、重置状态的逻辑
+            this.started = false;
+        }
+    }
+
     public void addPlayer(Player player) {
         if (!players.contains(player)) {
             players.add(player);
-            // 自动分配队伍逻辑
             for (Team team : teams) {
-                if (team.getPlayers().size() < 2) { // 假设每队最多2人
+                if (team.getPlayers().size() < 2) {
                     team.addPlayer(player);
                     break;
                 }
