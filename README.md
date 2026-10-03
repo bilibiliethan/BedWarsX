@@ -2,6 +2,8 @@
 
 Paper 1.20.5 plugin template for a small Bed Wars-like project.
 
+Important: Paper 1.20.5 requires Java 21 on the server. The build uses Java 21 toolchain.
+
 Features:
 - lobby and game join commands
 - map metadata management for spawns, beds, generators, shops
@@ -10,9 +12,19 @@ Features:
 - basic XP shop
 - bed break detection and winner logic
 
+## Requirements
+
+- Java 21 (JDK 21) installed for building and required by the server runtime
+- Gradle 8.6+ (recommended) — update the wrapper if necessary:
+
+```bash
+./gradlew wrapper --gradle-version 8.6
+```
+
 ## Compile
 
 ```bash
+# ensure the wrapper uses a Gradle version that supports Java 21 (8.6+)
 ./gradlew clean build
 ```
 
@@ -25,7 +37,12 @@ build/libs/BedWarsX-0.1.0.jar
 ## Install
 
 1. Copy the jar to your Paper server `plugins/` directory.
-2. Start the server.
+2. Start the server with Java 21 (example):
+
+```bash
+java -Xmx2G -Xms1G -jar paper-1.20.5.jar nogui
+```
+
 3. Example commands:
 
 ```text
